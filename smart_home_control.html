@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px 25px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #00d4ff, #090979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-weather {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .time {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .weather {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .weather-icon {
+            font-size: 1.5rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .devices-section {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .device-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .device-card:hover::before {
+            left: 100%;
+        }
+
+        .device-card:hover {
+            transform: translateY(-3px);
+            border-color: #00d4ff;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .device-card.active {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(9, 9, 121, 0.2));
+            border-color: #00d4ff;
+        }
+
+        .device-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .device-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .device-status {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            color: #00d4ff;
+        }
+
+        .quick-actions {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(9, 9, 121, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(9, 9, 121, 0.2));
+            border-color: #00d4ff;
+            transform: translateX(5px);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #00d4ff;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #090979);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #090979);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #00d4ff, #090979);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+
+        .security-status {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .security-icon {
+            font-size: 1.2rem;
+        }
+
+        .security-text {
+            font-size: 0.9rem;
+        }
+
+        .energy-chart {
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-top: 15px;
+            position: relative;
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .chart-bar {
+            width: 30px;
+            background: linear-gradient(to top, #00d4ff, #090979);
+            border-radius: 4px 4px 0 0;
+            animation: growUp 1s ease-out;
+            position: relative;
+        }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #00d4ff;
+        }
+
+        @keyframes growUp {
+            from { height: 0; }
+            to { height: var(--height); }
+        }
+
+        .notifications {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .notification {
+            background: rgba(0, 212, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            color: white;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .floating-music {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .music-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 50%;
+            color: #00d4ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .music-btn:hover {
+            background: rgba(0, 212, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .devices-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .floating-music {
+                position: static;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Smart Home Hub</h1>
+            <div class="time-weather">
+                <div class="time" id="currentTime">12:34 PM</div>
+                <div class="weather">
+                    <span class="weather-icon">🌤️</span>
+                    <div>
+                        <div>72°F</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">Partly Cloudy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="devices-section">
+                <h2 class="section-title">🔌 Connected Devices</h2>
+                <div class="devices-grid">
+                    <div class="device-card active" onclick="toggleDevice(this)">
+                        <span class="device-icon">💡</span>
+                        <div class="device-name">Living Room</div>
+                        <div class="device-status">On • 75%</div>
+                    </div>
+                    <div class="device-card" onclick="toggleDevice(this)">
+                        <span class="device-icon">🌡️</span>
+                        <div class="device-name">Thermostat</div>
+                        <div class="device-status">72°F</div>
+                    </div>
+                    <div class="device-card active" onclick="toggleDevice(this)">
+                        <span class="device-icon">📺</span>
+                        <div class="device-name">Smart TV</div>
+                        <div class="device-status">Netflix</div>
+                    </div>
+                    <div class="device-card" onclick="toggleDevice(this)">
+                        <span class="device-icon">🔒</span>
+                        <div class="device-name">Front Door</div>
+                        <div class="device-status">Locked</div>
+                    </div>
+                    <div class="device-card active" onclick="toggleDevice(this)">
+                        <span class="device-icon">📷</span>
+                        <div class="device-name">Security Cam</div>
+                        <div class="device-status">Recording</div>
+                    </div>
+                    <div class="device-card" onclick="toggleDevice(this)">
+                        <span class="device-icon">🎵</span>
+                        <div class="device-name">Speakers</div>
+                        <div class="device-status">Offline</div>
+                    </div>
+                    <div class="device-card active" onclick="toggleDevice(this)">
+                        <span class="device-icon">☕</span>
+                        <div class="device-name">Coffee Maker</div>
+                        <div class="device-status">Brewing</div>
+                    </div>
+                    <div class="device-card" onclick="toggleDevice(this)">
+                        <span class="device-icon">🌱</span>
+                        <div class="device-name">Garden Sprinkler</div>
+                        <div class="device-status">Scheduled</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h2 class="section-title">⚡ Quick Actions</h2>
+                <button class="action-btn" onclick="executeAction('goodnight')">
+                    <span>🌙</span> Good Night Mode
+                </button>
+                <button class="action-btn" onclick="executeAction('away')">
+                    <span>🚗</span> Away Mode
+                </button>
+                <button class="action-btn" onclick="executeAction('party')">
+                    <span>🎉</span> Party Mode
+                </button>
+                <button class="action-btn" onclick="executeAction('movie')">
+                    <span>🎬</span> Movie Mode
+                </button>
+                <button class="action-btn" onclick="executeAction('energy')">
+                    <span>🔋</span> Energy Saver
+                </button>
+            </div>
+        </div>
+
+        <div class="controls-grid">
+            <div class="control-panel">
+                <h3 class="section-title">🌡️ Climate Control</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Temperature</span>
+                        <span id="tempValue">72°F</span>
+                    </div>
+                    <input type="range" class="slider" min="60" max="85" value="72" id="tempSlider">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Humidity</span>
+                        <span id="humidityValue">45%</span>
+                    </div>
+                    <input type="range" class="slider" min="30" max="70" value="45" id="humiditySlider">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <span>Auto Mode</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3 class="section-title">💡 Lighting Control</h3>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Brightness</span>
+                        <span id="brightnessValue">75%</span>
+                    </div>
+                    <input type="range" class="slider" min="0" max="100" value="75" id="brightnessSlider">
+                </div>
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>Color Temperature</span>
+                        <span id="colorTempValue">Warm</span>
+                    </div>
+                    <input type="range" class="slider" min="0" max="100" value="30" id="colorTempSlider">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <span>Schedule Mode</span>
+                    <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3 class="section-title">🛡️ Security Status</h3>
+                <div class="security-status">
+                    <div class="security-item">
+                        <span class="security-icon">🔒</span>
+                        <div class="security-text">
+                            <div>Doors</div>
+                            <div style="color: #00d4ff; font-size: 0.8rem;">All Locked</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">🪟</span>
+                        <div class="security-text">
+                            <div>Windows</div>
+                            <div style="color: #00d4ff; font-size: 0.8rem;">2 Open</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">📷</span>
+                        <div class="security-text">
+                            <div>Cameras</div>
+                            <div style="color: #00d4ff; font-size: 0.8rem;">5 Active</div>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <span class="security-icon">🚨</span>
+                        <div class="security-text">
+                            <div>Alarm</div>
+                            <div style="color: #00d4ff; font-size: 0.8rem;">Armed</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <span>Security System</span>
+                    <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+                </div>
+            </div>
+
+            <div class="control-panel">
+                <h3 class="section-title">⚡ Energy Usage</h3>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; color: #00d4ff;">2.4kW</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">Current</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; color: #00d4ff;">$127</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">This Month</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; color: #00d4ff;">-15%</div>
+                        <div style="font-size: 0.8rem; opacity: 0.8;">vs Last Month</div>
+                    </div>
+                </div>
+                <div class="energy-chart">
+                    <div class="chart-bar" data-value="Mon" style="--height: 60px; height: 60px;"></div>
+                    <div class="chart-bar" data-value="Tue" style="--height: 80px; height: 80px;"></div>
+                    <div class="chart-bar" data-value="Wed" style="--height: 45px; height: 45px;"></div>
+                    <div class="chart-bar" data-value="Thu" style="--height: 70px; height: 70px;"></div>
+                    <div class="chart-bar" data-value="Fri" style="--height: 90px; height: 90px;"></div>
+                    <div class="chart-bar" data-value="Sat" style="--height: 55px; height: 55px;"></div>
+                    <div class="chart-bar" data-value="Sun" style="--height: 40px; height: 40px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notifications" id="notifications"></div>
+
+    <div class="floating-music">
+        <div>
+            <div style="font-weight: 600;">🎵 Chill Vibes</div>
+            <div style="font-size: 0.8rem; opacity: 0.8;">Lofi Hip Hop Radio</div>
+        </div>
+        <div class="music-controls">
+            <button class="music-btn" onclick="musicControl('prev')">⏮️</button>
+            <button class="music-btn" onclick="musicControl('play')" id="playBtn">⏸️</button>
+            <button class="music-btn" onclick="musicControl('next')">⏭️</button>
+        </div>
+    </div>
+
+    <script>
+        // Update time
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('currentTime').textContent = timeString;
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Device control
+        function toggleDevice(element) {
+            element.classList.toggle('active');
+            const deviceName = element.querySelector('.device-name').textContent;
+            const isActive = element.classList.contains('active');
+            
+            showNotification(`${deviceName} ${isActive ? 'activated' : 'deactivated'}`);
+            
+            // Update status text
+            const statusElement = element.querySelector('.device-status');
+            if (isActive) {
+                switch(deviceName) {
+                    case 'Living Room':
+                        statusElement.textContent = 'On • 75%';
+                        break;
+                    case 'Thermostat':
+                        statusElement.textContent = '72°F';
+                        break;
+                    case 'Smart TV':
+                        statusElement.textContent = 'Netflix';
+                        break;
+                    case 'Front Door':
+                        statusElement.textContent = 'Unlocked';
+                        break;
+                    case 'Security Cam':
+                        statusElement.textContent = 'Recording';
+                        break;
+                    case 'Speakers':
+                        statusElement.textContent = 'Playing';
+                        break;
+                    case 'Coffee Maker':
+                        statusElement.textContent = 'Brewing';
+                        break;
+                    case 'Garden Sprinkler':
+                        statusElement.textContent = 'Running';
+                        break;
+                }
+            } else {
+                statusElement.textContent = 'Offline';
+            }
+        }
+
+        // Quick actions
+        function executeAction(action) {
+            const actions = {
+                'goodnight': {
+                    message: 'Good Night mode activated',
+                    description: 'Lights dimmed, doors locked, temperature adjusted'
+                },
+                'away': {
+                    message: 'Away mode activated',
+                    description: 'Security armed, energy saving enabled'
+                },
+                'party': {
+                    message: 'Party mode activated',
+                    description: 'Lights brightened, music started'
+                },
+                'movie': {
+                    message: 'Movie mode activated',
+                    description: 'Lights dimmed, TV on, surround sound ready'
+                },
+                'energy': {
+                    message: 'Energy saver mode activated',
+                    description: 'Non-essential devices turned off'
+                }
+            };
+
+            showNotification(actions[action].message, actions[action].description);
+        }
+
+        // Slider controls
+        document.getElementById('tempSlider').addEventListener('input', function() {
+            document.getElementById('tempValue').textContent = this.value + '°F';
+        });
+
+        document.getElementById('humiditySlider').addEventListener('input', function() {
+            document.getElementById('humidityValue').textContent = this.value + '%';
+        });
+
+        document.getElementById('brightnessSlider').addEventListener('input', function() {
+            document.getElementById('brightnessValue').textContent = this.value + '%';
+        });
+
+        document.getElementById('colorTempSlider').addEventListener('input', function() {
+            const value = parseInt(this.value);
+            let temp;
+            if (value < 33) temp = 'Warm';
+            else if (value < 66) temp = 'Natural';
+            else temp = 'Cool';
+            document.getElementById('colorTempValue').textContent = temp;
+        });
+
+        // Toggle switches
+        function toggleSwitch(element) {
+            element.classList.toggle('active');
+        }
+
+        // Music controls
+        let isPlaying = true;
+        function musicControl(action) {
+            if (action === 'play') {
+                isPlaying = !isPlaying;
+                document.getElementById('playBtn').textContent = isPlaying ? '⏸️' : '▶️';
+                showNotification(isPlaying ? 'Music resumed' : 'Music paused');
+            } else {
+                showNotification(`${action === 'next' ? 'Next' : 'Previous'} track`);
+            }
+        }
+
+        // Notifications
+        function showNotification(message, description = '') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <div style="font-weight: 600;">${message}</div>
+                ${description ? `<div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">${description}</div>` : ''}
+            `;
+            
+            document.getElementById('notifications').appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+
+        // Initialize with welcome message
+        setTimeout(() => {
+            showNotification('Welcome back!', 'All systems operational');
+        }, 1000);
+
+        // Simulate random notifications
+        const randomNotifications = [
+            'Motion detected at front door',
+            'Coffee maker finished brewing',
+            'Garden sprinkler started',
+            'Energy usage 15% below average',
+            'Security system armed'
+        ];
+
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const randomMsg = randomNotifications[Math.floor(Math.random() * randomNotifications.length)];
+                showNotification(randomMsg);
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
